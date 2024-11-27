@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Traffic Incidents</title>
+    <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+</head>
+<body>
+    <h1>Traffic Incidents: Interactive Visualization</h1>
+    <div id="chart"></div>
+
+    <script>
+        const trafficSpec = {
+            "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+            "title": "Traffic Incidents Overview",
+            "data": {
+                "values": [
+                    { "year_month": "2023-Mar", "accident_name": "بسيط", "count": 5059 },
+                    { "year_month": "2023-Mar", "accident_name": "بليغ", "count": 485 },
+                    { "year_month": "2023-Mar", "accident_name": "مخالفه", "count": 131 },
+                    { "year_month": "2023-Apr", "accident_name": "بسيط", "count": 5790 },
+                    { "year_month": "2023-Apr", "accident_name": "بليغ", "count": 616 },
+                    { "year_month": "2023-Apr", "accident_name": "مخالفه", "count": 246 },
+                    { "year_month": "2024-Mar", "accident_name": "بسيط", "count": 6238 },
+                    { "year_month": "2024-Mar", "accident_name": "بليغ", "count": 601 },
+                    { "year_month": "2024-Mar", "accident_name": "مخالفه", "count": 309 },
+                    { "year_month": "2024-Apr", "accident_name": "بسيط", "count": 3897 },
+                    { "year_month": "2024-Apr", "accident_name": "بليغ", "count": 343 },
+                    { "year_month": "2024-Apr", "accident_name": "مخالفه", "count": 192 },
+                    { "year_month": "2024-Jun", "accident_name": "بسيط", "count": 5224 },
+                    { "year_month": "2024-Jun", "accident_name": "بليغ", "count": 409 },
+                    { "year_month": "2024-Jun", "accident_name": "مخالفه", "count": 323 },
+                    { "year_month": "2024-Jul", "accident_name": "بسيط", "count": 7753 },
+                    { "year_month": "2024-Jul", "accident_name": "بليغ", "count": 625 },
+                    { "year_month": "2024-Jul", "accident_name": "مخالفه", "count": 515 },
+                    { "year_month": "2024-Aug", "accident_name": "بسيط", "count": 7938 },
+                    { "year_month": "2024-Aug", "accident_name": "بليغ", "count": 689 },
+                    { "year_month": "2024-Aug", "accident_name": "مخالفه", "count": 570 },
+                    { "year_month": "2024-Sep", "accident_name": "بسيط", "count": 560 },
+                    { "year_month": "2024-Sep", "accident_name": "بليغ", "count": 46 },
+                    { "year_month": "2024-Sep", "accident_name": "مخالفه", "count": 39 }
+                ]
+            },
+            "vconcat": [
+                {
+                    "width": 1000,
+                    "height": 400,
+                    "mark": {
+                        "type": "circle",
+                        "tooltip": true
+                    },
+                    "params": [
+                        {
+                            "name": "brush",
+                            "select": {
+                                "type": "interval",
+                                "encodings": ["x"]
+                            }
+                        }
+                    ],
+                    "encoding": {
+                        "x": {
+                            "field": "year_month",
+                            "type": "ordinal",
+                            "title": "Month-Year",
+                            "sort": [
+                                "2023-Mar", "2023-Apr", 
+                                "2024-Mar", "2024-Apr", "2024-Jun", "2024-Jul", "2024-Aug", "2024-Sep"
+                            ]
+                        },
+                        "y": {
+                            "field": "count",
+                            "type": "quantitative",
+                            "title": "Count"
+                        },
+                        "color": {
+                            "field": "accident_name",
+                            "type": "nominal",
+                            "legend": {"title": "Accident Type"},
+                            "scale": {
+                                "domain": ["بسيط", "بليغ", "مخالفه"],
+                                "range": ["#f8c8dc", "#800080", "#00008b"]
+                            }
+                        },
+                        "size": {"value": 150}
+                    }
+                },
+                {
+                    "hconcat": [
+                        {
+                            "width": 350,
+                            "height": 200,
+                            "mark": "bar",
+                            "transform": [
+                                {"filter": {"param": "brush"}}
+                            ],
+                            "encoding": {
+                                "x": {
+                                    "field": "accident_name",
+                                    "type": "nominal",
+                                    "title": "Accident Type",
+                                    "sort": "-y",
+                                    "axis": {
+                                        "labelFontWeight": "bold",
+                                        "labelFontSize": 18
+                                    }
+                                },
+                                "y": {
+                                    "aggregate": "sum",
+                                    "field": "count",
+                                    "type": "quantitative",
+                                    "title": "Total Incidents"
+                                },
+                                "color": {
+                                    "field": "accident_name",
+                                    "type": "nominal",
+                                    "legend": null,
+                                    "scale": {
+                                        "domain": ["بسيط", "بليغ", "مخالفه"],
+                                        "range": ["#f8c8dc", "#800080", "#00008b"]
+                                    }
+                                }
+                            }
+                        },
+                        {
+                            "width": 400,
+                            "height": 200,
+                            "mark": "line",
+                            "transform": [
+                                {"filter": {"param": "brush"}},
+                                {
+                                    "aggregate": [
+                                        {"op": "mean", "field": "count", "as": "mean_count"}
+                                    ],
+                                    "groupby": ["year_month"]
+                                }
+                            ],
+                            "encoding": {
+                                "x": {
+                                    "field": "year_month",
+                                    "type": "ordinal",
+                                    "title": "Month-Year",
+                                    "sort": [
+                                        "2023-Mar", "2023-Apr", "2024-Mar", "2024-Apr", 
+                                        "2024-Jun", "2024-Jul", "2024-Aug", "2024-Sep"
+                                    ]
+                                },
+                                "y": {
+                                    "field": "mean_count",
+                                    "type": "quantitative",
+                                    "title": "Average Count"
+                                },
+                                "color": {"value": "#4B4B4B"}
+                            }
+                        }
+                    ]
+                }
+            ]
+        };
+
+        vegaEmbed("#chart", trafficSpec).catch(console.error);
+    </script>
+</body>
+</html>
